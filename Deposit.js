@@ -2,21 +2,57 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
  import  './deposit.css';
  import bank from './bank.png';
+ import axios from 'axios';
 
 class Deposit extends Component {
     state = { 
+        id:localStorage.getItem('id'),
         accountType:localStorage.getItem('accountType'),
         depoistAmount:'',
+        fields:[{
+            account:'',
+            address:'',
+            branch:'',
+            contact:'',
+            country:'',
+            dob:'',
+            email:'',
+           id:localStorage.getItem('id'),
+           idm:localStorage.getItem('idm'),
+           idn:'',
+           ipt:'',
+           name:'',
+           password:'',
+           state:'',
+           userName:''
+                   }
+        ],
          accountValue:false,
+         isSubmit:false,
         availableBalance:localStorage.getItem('idm'),
-        depoistAmountErr:'',
-        availableBalanceErr:''
+        depoistAmountErr:{
+            nodata:''
+        },
+        availableBalanceErr:{
+            nodata:''
+        }
+     }
+    componentDidMount(){
+     axios.get('http://localhost:3000/Users?id='+this.state.id).then(
+             Response=>{
+            this.setState({fields:Response.data[0]});
+            console.log(Response.data[0])
+        }).catch(err=>{
+        console.log(err)
+    })
+       console.log(this.state.fields)
      }
      DisplayBalance=()=>{
        
+        const depoistAmount=this.state.depoistAmount;
         //setAvailableBalance(parseInt(availableBalance)+parseInt(depoistAmount));
-        if(!isNaN((this.state.depoistAmount))){
-        const availableBalance=parseInt(this.state.availableBalance)+parseInt(this.state.depoistAmount);
+        if(!isNaN(parseInt(depoistAmount))){
+        const availableBalance=parseInt(parseInt(this.state.availableBalance)+parseInt(this.state.depoistAmount));
        this.setState({
            accountValue:true
        })
@@ -33,7 +69,7 @@ class Deposit extends Component {
         this.setState({
             accountValue:false
         })
-        const availableBalance=parseInt(availableBalance)
+        const availableBalance=parseInt(this.state.availableBalance)
         this.setState({
             availableBalance 
         })
@@ -46,6 +82,13 @@ class Deposit extends Component {
         if(isValid){
             alert('your availabe balance is '+this.state.availableBalance);
             console.log("submitted");      
+            axios.put('http://localhost:3000/Users/'+this.state.fields.id,this.state.fields).then(Response=>{
+               this.state.fields.idm=this.state.availableBalance
+            this.setState({isSubmit:true});
+            }).catch(err=>{
+                console.log(err);
+            })
+            console.log(this.state.availableBalance)
         }
         else
         alert('invalid');
@@ -54,12 +97,12 @@ class Deposit extends Component {
      formValidation=()=>{
         var isValid=true;
        // const accountType={};
-        const depoistAmountErr={};
+        let depoistAmountErr=this.state.depoistAmountErr;
         const availableBalance={};
         console.log(this.state.depoistAmount)
         if(!this.state.depoistAmount){
             isValid=false;
-            this.depoistAmountErr.nodata="cannot be empty";
+            depoistAmountErr.nodata="cannot be empty";
         }
         if(typeof this.state.depoistAmount!=='undefined'){
             var reg=new RegExp('^[0-9]+$');
@@ -127,7 +170,7 @@ class Deposit extends Component {
    </div>
    <div className="form-group">
        <label htmlFor="depoistAmount">Deposit Amount</label>
-       <input type="depoistAmount" className="form-control" name="depoistAmount" id="depoistAmount" onChange={(e)=>this.depositHandleChange(e)}></input>
+       <input type="number" className="form-control" name="depoistAmount" id="depoistAmount" onChange={(e)=>this.depositHandleChange(e)}></input>
        {Object.keys(this.state.depoistAmountErr).map((key)=>{
            return <div key={key} style={{color:"red"}}>{this.state.depoistAmountErr[key]}</div>
        })}
@@ -137,10 +180,12 @@ class Deposit extends Component {
    <button type="submit" className="btn btn-primary mr-1" onClick={this.DisplayBalance} >Submit</button>
     
    </div>
-   {
+   
+  {
 
-this.state.accountValue===true?<div> <textarea value={this.state.availableBalance}>{this.state.availableBalance}</textarea></div>:<textarea value={this.state.availableBalance}>{this.state.availableBalance}</textarea>
+this.state.accountValue===true?<div><textarea value={this.state.fields.idm}>{this.state.fields.idm}</textarea></div>:<textarea value={this.state.fields.idm}>{this.state.fields.idm}</textarea>
         }
+        
         </div>
   </form>
    </div>
