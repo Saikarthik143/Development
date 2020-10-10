@@ -101,7 +101,7 @@ const submitHandler = (e) => {
           
            {submitVal===true? <Link to={{pathname:'/DEMO',hash:'#Demo'}}>
            Submit
-                    </Link>:<button type="submit" className="button primary" >Submit</button>}
+                    </Link>:<button type="submit" id="loansubmit" className="button primary" >Submit</button>}
           </div>
    </form>
    </div>
